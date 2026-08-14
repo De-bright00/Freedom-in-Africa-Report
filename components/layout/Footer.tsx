@@ -22,12 +22,11 @@ export function Footer() {
               <TorchIcon className="size-6" />
             </span>
             <div>
-              <p className="font-serif text-lg font-bold">Liberalist Centre</p>
-              <p className="text-xs text-primary-foreground/60">Freedom in Africa Report</p>
+              <p className="font-serif text-lg font-bold">Freedom in Africa Report</p>
             </div>
           </div>
           <p className="mt-6 max-w-sm text-sm leading-6 text-primary-foreground/65">
-            Liberalist Centre is a policy and research think tank measuring political freedom, economic freedom, and prosperity across Africa.
+            Freedom in Africa Report (F[in]AR) is a project of the Liberalist Centre, a research and policy think tank promoting liberty and prosperity in Africa.
           </p>
           <div className="mt-8 max-w-sm">
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-primary-foreground/70">Research updates</p>

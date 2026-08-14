@@ -24,17 +24,12 @@ export default function FindingsPage() {
       <main>
         <section className="bg-primary text-primary-foreground">
           <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 lg:grid-cols-[280px_1fr] lg:items-center lg:px-8">
-            <div className="relative flex min-h-[340px] items-end overflow-hidden bg-primary-foreground/10 p-6 shadow-2xl">
-              <div className="absolute right-[-1rem] top-[-2rem] font-serif text-[13rem] font-bold leading-none text-primary-foreground/[0.04]">25</div>
-              <div className="absolute right-6 top-6 flex size-14 items-center justify-center rounded-full border border-accent/60 text-accent">
-                <span className="font-serif text-xl font-bold">LC</span>
-              </div>
-              <div className="relative">
-                <p className="mb-3 text-[0.62rem] font-bold uppercase tracking-[0.2em] text-liberalist-coral">Liberalist Centre · Annual Report</p>
-                <p className="font-serif text-3xl font-bold leading-tight">F(in)AR 2025</p>
-                <p className="mt-1 text-[0.65rem] font-sans font-normal tracking-wide text-primary-foreground/70">Freedom in Africa Report</p>
-                <p className="mt-4 text-xs uppercase tracking-[0.18em] text-primary-foreground/70">Africa · 2025</p>
-              </div>
+            <div className="mx-auto max-w-[280px] shadow-2xl overflow-hidden rounded-lg border border-white/10">
+              <img
+                src="/finar-2025-cover.png"
+                alt="Freedom in Africa Report 2025 Cover"
+                className="w-full h-auto object-cover"
+              />
             </div>
             <div>
               <p className="section-kicker-invert">Findings · 2025 edition</p>

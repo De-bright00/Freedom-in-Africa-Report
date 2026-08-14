@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button'
 import { Footer } from '@/components/layout/Footer'
 import { Navbar } from '@/components/layout/Navbar'
 import { ScoreBadge } from '@/components/ui/ScoreBadge'
-import { TorchIcon } from '@/components/ui/TorchIcon'
-import { CountrySearch } from '@/components/ui/CountrySearch'
 import { currentReport, dimensions, getTopCountries, globalComparison, regions } from '@/lib/data'
 import { GlobalComparisonChart, RegionalChart } from '@/components/charts/RegionalChart'
 
@@ -13,26 +11,9 @@ const exploreItems = [
   { icon: ScaleIcon, title: 'Political Freedom', text: 'Electoral integrity, expression, and judicial independence.', href: '/political-freedom' },
   { icon: Landmark, title: 'Economic Freedom', text: 'Property rights, trade openness, and business regulation.', href: '/economic-freedom' },
   { icon: TrendingUp, title: 'Prosperity', text: 'Income, education, healthcare, and peace outcomes.', href: '/prosperity' },
-  { icon: MapPinned, title: 'Regional Overview', text: 'Compare Africa\u2019s five regions side by side.', href: '/regional-overview' },
+  { icon: MapPinned, title: 'Regional Overview', text: 'Compare Africa’s five regions side by side.', href: '/regional-overview' },
   { icon: BarChart3, title: 'Methodology', text: 'How 54 countries are scored across nine data sources.', href: '/methodology' },
 ]
-
-function CoverArt({ small = false }: { small?: boolean }) {
-  return (
-    <div className={`relative flex overflow-hidden bg-primary ${small ? 'h-36' : 'min-h-[360px]'} items-end p-6 text-primary-foreground`}>
-      <div className="absolute right-[-1rem] top-[-2rem] font-serif text-[13rem] font-bold leading-none text-primary-foreground/[0.04]">25</div>
-      <div className="absolute right-8 top-8 flex size-16 items-center justify-center rounded-full border border-accent/60 text-accent">
-        <TorchIcon className="size-9" />
-      </div>
-      <div className="relative">
-        <p className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.22em] text-liberalist-coral">Liberalist Centre · Annual Report</p>
-        <p className={`max-w-xs font-serif font-bold leading-tight ${small ? 'text-lg' : 'text-3xl'}`}>F(in)AR 2025</p>
-        <p className={`mt-1 font-sans font-normal leading-tight tracking-wide ${small ? 'text-[0.6rem]' : 'text-xs'} text-primary-foreground/60`}>Freedom in Africa Report</p>
-        <p className="mt-4 text-xs uppercase tracking-[0.18em] text-primary-foreground/70">Africa · {currentReport.year}</p>
-      </div>
-    </div>
-  )
-}
 
 export default function HomePage() {
   const topCountries = getTopCountries().slice(0, 5)
@@ -48,7 +29,7 @@ export default function HomePage() {
           />
           <div className="relative mx-auto grid max-w-7xl gap-12 px-5 py-20 md:py-28 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-8">
             <div>
-              <p className="mb-6 text-xs font-bold uppercase tracking-[0.22em] text-liberalist-coral">Liberalist Centre · F(in)AR 2025</p>
+              <p className="mb-6 text-xs font-bold uppercase tracking-[0.22em] text-liberalist-coral">F(in)AR 2025</p>
               <h1 className="max-w-3xl text-balance text-4xl font-bold leading-[1.08] tracking-tight md:text-6xl lg:text-7xl">Measuring Political Freedom, Economic Freedom &amp; Prosperity in Africa</h1>
               <p className="mt-7 max-w-xl text-pretty text-lg leading-8 text-primary-foreground/70">
                 The Freedom in Africa Report scores 54 nations on the conditions that let people vote, trade, work, and build a better life — combined into one comparable index.
@@ -67,8 +48,12 @@ export default function HomePage() {
               </div>
             </div>
             <div className="hidden lg:block">
-              <div className="mx-auto max-w-sm rotate-3 shadow-2xl">
-                <CoverArt />
+              <div className="mx-auto max-w-[340px] rotate-3 shadow-2xl overflow-hidden rounded-lg border border-white/10">
+                <img
+                  src="/finar-2025-cover.png"
+                  alt="Freedom in Africa Report 2025 Cover"
+                  className="w-full h-auto object-cover"
+                />
               </div>
             </div>
           </div>

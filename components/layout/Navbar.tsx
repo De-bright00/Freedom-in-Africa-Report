@@ -20,13 +20,12 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-primary text-primary-foreground">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-5 lg:px-8">
-        <Link href="/" className="flex shrink-0 items-center gap-3" aria-label="Liberalist Centre home">
+        <Link href="/" className="flex shrink-0 items-center gap-3" aria-label="Freedom in Africa Report home">
           <span className="flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground">
             <TorchIcon className="size-6" />
           </span>
-          <span className="flex flex-col">
-            <span className="font-serif text-lg font-bold leading-none tracking-tight">Liberalist Centre</span>
-            <span className="mt-1 text-[0.62rem] font-medium uppercase tracking-[0.2em] text-primary-foreground/60">Freedom in Africa Report</span>
+          <span className="font-serif text-lg font-bold leading-none tracking-tight">
+            Freedom in Africa Report
           </span>
         </Link>
         <nav className="hidden items-center gap-5 xl:flex" aria-label="Main navigation">

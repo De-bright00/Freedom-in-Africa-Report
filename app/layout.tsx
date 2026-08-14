@@ -8,7 +8,7 @@ const libreBaskerville = Libre_Baskerville({ subsets: ['latin'], variable: '--fo
 
 export const metadata: Metadata = {
   title: {
-    default: 'F(in)AR 2025 | Freedom in Africa Report — Liberalist Centre',
+    default: 'Freedom in Africa Report',
     template: '%s | Freedom in Africa Report',
   },
   description: 'The Freedom in Africa Report (F(in)AR) measures political freedom, economic freedom, and prosperity across 54 African nations. Published by Liberalist Centre.',

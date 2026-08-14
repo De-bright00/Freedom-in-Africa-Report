@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Search, ArrowUpDown, X, SlidersHorizontal, ScaleIcon, Landmark, TrendingUp, HelpCircle, Check, Info } from 'lucide-react'
+import { Search, ArrowUpDown, X, SlidersHorizontal, ScaleIcon, Landmark, TrendingUp, HelpCircle, Check, Info, ChevronDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
@@ -10,10 +10,21 @@ import { ScoreBadge } from '@/components/ui/ScoreBadge'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { countries, getScoreColor, getScoreLabel, type Country } from '@/lib/data'
 
+type ParameterType = 'score' | 'politicalScore' | 'economicScore' | 'prosperityScore'
+
+const parameters: { value: ParameterType; label: string }[] = [
+  { value: 'score', label: 'Overall Score' },
+  { value: 'politicalScore', label: 'Political Freedom' },
+  { value: 'economicScore', label: 'Economic Freedom' },
+  { value: 'prosperityScore', label: 'Prosperity' },
+]
+
 export function RankingsDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRegion, setSelectedRegion] = useState<string>('All')
-  const [sortField, setSortField] = useState<'rank' | 'score' | 'name'>('rank')
+  const [selectedParameters, setSelectedParameters] = useState<ParameterType[]>(['score'])
+  const [isIndexDropdownOpen, setIsIndexDropdownOpen] = useState(false)
+  const [sortField, setSortField] = useState<string>('rank')
   const [sortAsc, setSortAsc] = useState<boolean>(true)
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<'rankings' | 'compare'>('rankings')
@@ -29,18 +40,43 @@ export function RankingsDashboard() {
   }
 
   // Handle sorting
-  const handleSort = (field: 'rank' | 'score' | 'name') => {
+  const handleSort = (field: string) => {
     if (sortField === field) {
       setSortAsc((prev) => !prev)
     } else {
       setSortField(field)
-      setSortAsc(field === 'name' ? true : true) // Rank ascending is default (1 to 54), Name ascending is default, Score ascending is default (highest is rank 1, but let's make rank ascending 1-54)
+      setSortAsc(field === 'name' || field === 'rank' ? true : false)
     }
   }
 
+  // Pre-calculate ranks for all parameters
+  const rankedCountries = useMemo(() => {
+    const sortedOverall = [...countries].sort((a, b) => b.score - a.score)
+    const sortedPolitical = [...countries].sort((a, b) => b.politicalScore - a.politicalScore)
+    const sortedEconomic = [...countries].sort((a, b) => b.economicScore - a.economicScore)
+    const sortedProsperity = [...countries].sort((a, b) => b.prosperityScore - a.prosperityScore)
+
+    return countries.map((country) => {
+      const rankOverall = sortedOverall.filter((c) => c.score > country.score).length + 1
+      const rankPolitical = sortedPolitical.filter((c) => c.politicalScore > country.politicalScore).length + 1
+      const rankEconomic = sortedEconomic.filter((c) => c.economicScore > country.economicScore).length + 1
+      const rankProsperity = sortedProsperity.filter((c) => c.prosperityScore > country.prosperityScore).length + 1
+
+      return {
+        ...country,
+        ranks: {
+          score: rankOverall,
+          politicalScore: rankPolitical,
+          economicScore: rankEconomic,
+          prosperityScore: rankProsperity,
+        } as Record<ParameterType, number>
+      }
+    })
+  }, [])
+
   // Filter and sort countries
   const filteredAndSortedCountries = useMemo(() => {
-    return countries
+    return rankedCountries
       .filter((country) => {
         const matchesSearch =
           country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -49,20 +85,36 @@ export function RankingsDashboard() {
         return matchesSearch && matchesRegion
       })
       .sort((a, b) => {
-        let valA = a[sortField]
-        let valB = b[sortField]
+        let valA: string | number
+        let valB: string | number
 
-        // Handle string comparison for names
+        if (sortField === 'name') {
+          valA = a.name
+          valB = b.name
+        } else if (sortField === 'rank') {
+          const activeRankParam = selectedParameters.includes('score')
+            ? 'score'
+            : selectedParameters[0] || 'score'
+          valA = a.ranks[activeRankParam]
+          valB = b.ranks[activeRankParam]
+        } else {
+          valA = a[sortField as ParameterType]
+          valB = b[sortField as ParameterType]
+        }
+
         if (typeof valA === 'string' && typeof valB === 'string') {
           return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA)
         }
 
-        // Numbers comparison (rank or score)
-        return sortAsc
-          ? (valA as number) - (valB as number)
-          : (valB as number) - (valA as number)
+        if (sortField === 'rank') {
+          return sortAsc ? (valA as number) - (valB as number) : (valB as number) - (valA as number)
+        } else {
+          return sortAsc
+            ? (valA as number) - (valB as number)
+            : (valB as number) - (valA as number)
+        }
       })
-  }, [searchQuery, selectedRegion, sortField, sortAsc])
+  }, [rankedCountries, searchQuery, selectedRegion, sortField, sortAsc, selectedParameters])
 
   // Get selected countries data for comparison
   const selectedCountriesData = useMemo(() => {
@@ -100,7 +152,7 @@ export function RankingsDashboard() {
     <div className="flex flex-col gap-6">
       {/* Search and Filters Panel */}
       {activeTab === 'rankings' && (
-        <div className="grid gap-4 rounded-xl border bg-card p-5 shadow-sm md:grid-cols-[1.5fr_1fr_auto]">
+        <div className="grid gap-4 rounded-xl border bg-card p-5 shadow-sm md:grid-cols-[1.5fr_1.2fr_1.2fr_auto] items-end">
           {/* Search bar */}
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -121,25 +173,72 @@ export function RankingsDashboard() {
             )}
           </div>
 
-          {/* Region selector */}
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="size-4 shrink-0 text-muted-foreground" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground md:inline">Region:</span>
-            <div className="flex flex-wrap gap-1">
-              {regions.map((reg) => (
-                <button
-                  key={reg}
-                  onClick={() => setSelectedRegion(reg)}
-                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
-                    selectedRegion === reg
-                      ? 'bg-primary text-primary-foreground shadow-sm dark:bg-accent'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
-                >
-                  {reg}
-                </button>
-              ))}
+          {/* Region selector dropdown */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Region</span>
+            <div className="relative">
+              <select
+                value={selectedRegion}
+                onChange={(e) => setSelectedRegion(e.target.value)}
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none cursor-pointer pr-10"
+              >
+                {regions.map((reg) => (
+                  <option key={reg} value={reg}>
+                    {reg === 'All' ? 'All Regions' : `${reg} Africa`}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground">
+                <ChevronDown className="size-4" />
+              </div>
             </div>
+          </div>
+
+          {/* Index/Parameter selector dropdown */}
+          <div className="flex flex-col gap-1.5 relative">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Index Parameters</span>
+            <button
+              type="button"
+              onClick={() => setIsIndexDropdownOpen(!isIndexDropdownOpen)}
+              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer text-left"
+            >
+              <span className="truncate">
+                {selectedParameters.length === 0
+                  ? 'Select parameters...'
+                  : selectedParameters.map(p => parameters.find(param => param.value === p)?.label).join(', ')}
+              </span>
+              <ChevronDown className="size-4 shrink-0 text-muted-foreground ml-2" />
+            </button>
+            {isIndexDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setIsIndexDropdownOpen(false)} />
+                <div className="absolute top-[62px] left-0 z-20 w-full min-w-[200px] rounded-md border bg-card p-2 text-foreground shadow-md outline-none animate-in fade-in-80">
+                  {parameters.map((param) => {
+                    const isChecked = selectedParameters.includes(param.value)
+                    return (
+                      <label
+                        key={param.value}
+                        className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-muted"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {
+                            setSelectedParameters(prev =>
+                              isChecked
+                                ? (prev.length === 1 ? prev : prev.filter(p => p !== param.value))
+                                : [...prev, param.value]
+                            )
+                          }}
+                          className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center border"
+                        />
+                        {param.label}
+                      </label>
+                    )
+                  })}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Compare trigger button */}
@@ -147,7 +246,7 @@ export function RankingsDashboard() {
             <Button
               disabled={selectedSlugs.length < 2}
               onClick={() => setActiveTab('compare')}
-              className="relative bg-accent text-accent-foreground hover:bg-accent/90"
+              className="relative w-full md:w-auto bg-accent text-accent-foreground hover:bg-accent/90"
             >
               Compare Selected
               {selectedSlugs.length > 0 && (
@@ -219,21 +318,26 @@ export function RankingsDashboard() {
                     </button>
                   </th>
                   <th className="px-4 py-3.5 hidden md:table-cell">Region</th>
-                  <th className="px-4 py-3.5 text-right md:text-left">
-                    <button
-                      onClick={() => handleSort('score')}
-                      className="group inline-flex items-center gap-1.5 hover:text-foreground"
-                    >
-                      Score
-                      <ArrowUpDown className="size-3.5 text-muted-foreground/60 transition-colors group-hover:text-foreground" />
-                    </button>
-                  </th>
+                  {selectedParameters.map((param) => {
+                    const paramInfo = parameters.find((p) => p.value === param)
+                    return (
+                      <th key={param} className="px-4 py-3.5 text-right md:text-left">
+                        <button
+                          onClick={() => handleSort(param)}
+                          className="group inline-flex items-center gap-1.5 hover:text-foreground"
+                        >
+                          {paramInfo?.label || 'Score'}
+                          <ArrowUpDown className="size-3.5 text-muted-foreground/60 transition-colors group-hover:text-foreground" />
+                        </button>
+                      </th>
+                    )
+                  })}
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {filteredAndSortedCountries.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                    <td colSpan={4 + selectedParameters.length} className="px-6 py-12 text-center text-muted-foreground">
                       No countries match your filter criteria.
                     </td>
                   </tr>
@@ -260,7 +364,11 @@ export function RankingsDashboard() {
 
                         {/* Rank */}
                         <td className="px-4 py-3 font-serif text-base font-bold text-muted-foreground">
-                          #{country.rank}
+                          #{
+                            sortField === 'name' || sortField === 'rank'
+                              ? country.ranks[selectedParameters[0] || 'score']
+                              : country.ranks[sortField as ParameterType]
+                          }
                         </td>
 
                         {/* Flag & Name */}
@@ -278,10 +386,12 @@ export function RankingsDashboard() {
                           {country.region} Africa
                         </td>
 
-                        {/* Score */}
-                        <td className="px-4 py-3 text-right md:text-left">
-                          <ScoreBadge score={country.score} />
-                        </td>
+                        {/* Score columns */}
+                        {selectedParameters.map((param) => (
+                          <td key={param} className="px-4 py-3 text-right md:text-left">
+                            <ScoreBadge score={country[param]} />
+                          </td>
+                        ))}
                       </tr>
                     )
                   })
