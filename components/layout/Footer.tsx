@@ -2,13 +2,13 @@ import Link from 'next/link'
 import { ArrowUpRight, Mail } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { TorchIcon } from '@/components/ui/TorchIcon'
 
 const exploreLinks = [
   { label: 'Home', href: '/' },
   { label: 'About', href: '/about' },
   { label: 'Methodology', href: '/methodology' },
   { label: 'Findings', href: '/findings' },
+  { label: 'Dataset', href: '/dataset' },
   { label: 'Regional Overview', href: '/regional-overview' },
 ]
 
@@ -17,14 +17,13 @@ export function Footer() {
     <footer className="bg-primary text-primary-foreground">
       <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 md:grid-cols-[1.3fr_0.7fr_1fr] lg:px-8">
         <div>
-          <div className="flex items-center gap-3">
-            <span className="flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground">
-              <TorchIcon className="size-6" />
-            </span>
-            <div>
-              <p className="font-serif text-lg font-bold">Freedom in Africa Report</p>
-            </div>
-          </div>
+          <Link href="/" className="inline-block" aria-label="F(in)AR home">
+            <img
+              src="/logo.png"
+              alt="F(in)AR"
+              className="h-10 w-auto object-contain"
+            />
+          </Link>
           <p className="mt-6 max-w-sm text-sm leading-6 text-primary-foreground/65">
             Freedom in Africa Report (F[in]AR) is a project of the Liberalist Centre, a research and policy think tank promoting liberty and prosperity in Africa.
           </p>

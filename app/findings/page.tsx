@@ -23,18 +23,11 @@ export default function FindingsPage() {
       <Navbar />
       <main>
         <section className="bg-primary text-primary-foreground">
-          <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 lg:grid-cols-[280px_1fr] lg:items-center lg:px-8">
-            <div className="mx-auto max-w-[280px] shadow-2xl overflow-hidden rounded-lg border border-white/10">
-              <img
-                src="/finar-2025-cover.png"
-                alt="Freedom in Africa Report 2025 Cover"
-                className="w-full h-auto object-cover"
-              />
-            </div>
-            <div>
+          <div className="mx-auto max-w-7xl px-5 py-12 md:py-16 lg:px-8">
+            <div className="max-w-3xl">
               <p className="section-kicker-invert">Findings · 2025 edition</p>
-              <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight md:text-6xl">The State of Freedom in Africa</h1>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-primary-foreground/70">{currentReport.description}</p>
+              <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-6xl">The State of Freedom in Africa</h1>
+              <p className="mt-6 text-lg leading-8 text-primary-foreground/70">{currentReport.description}</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
                   <Link href={currentReport.pdfUrl} download="F(in)AR_2025_Freedom_in_Africa_Report.pdf" target="_blank" rel="noopener noreferrer">

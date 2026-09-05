@@ -27,9 +27,9 @@ export default function HomePage() {
             className="absolute inset-0 opacity-[0.06]"
             style={{ backgroundImage: 'linear-gradient(135deg, transparent 45%, white 45%, white 46%, transparent 46%), linear-gradient(45deg, transparent 45%, white 45%, white 46%, transparent 46%)', backgroundSize: '64px 64px' }}
           />
-          <div className="relative mx-auto grid max-w-7xl gap-12 px-5 py-20 md:py-28 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-8">
+          <div className="relative mx-auto grid max-w-7xl gap-12 px-5 pt-8 pb-16 md:pt-12 md:pb-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-8">
             <div>
-              <p className="mb-6 text-xs font-bold uppercase tracking-[0.22em] text-liberalist-coral">F(in)AR 2025</p>
+              <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-liberalist-coral md:mb-4">F(in)AR 2025</p>
               <h1 className="max-w-3xl text-balance text-4xl font-bold leading-[1.08] tracking-tight md:text-6xl lg:text-7xl">Measuring Political Freedom, Economic Freedom &amp; Prosperity in Africa</h1>
               <p className="mt-7 max-w-xl text-pretty text-lg leading-8 text-primary-foreground/70">
                 The Freedom in Africa Report scores 54 nations on the conditions that let people vote, trade, work, and build a better life — combined into one comparable index.

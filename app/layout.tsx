@@ -14,8 +14,12 @@ export const metadata: Metadata = {
   description: 'The Freedom in Africa Report (F(in)AR) measures political freedom, economic freedom, and prosperity across 54 African nations. Published by Liberalist Centre.',
   generator: 'Liberalist Centre',
   icons: {
-    icon: '/icon.svg',
-    apple: '/icon.svg',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    apple: '/favicon.png',
   },
 }
 
