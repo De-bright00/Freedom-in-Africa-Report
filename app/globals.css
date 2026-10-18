@@ -173,9 +173,9 @@
   .score-badge { @apply inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-bold tabular-nums; }
   .score-badge-sm { @apply px-2 py-0.5 text-xs; }
   .score-badge-lg { @apply px-4 py-2 text-2xl; }
-  .score-high { @apply bg-green-100 text-green-900; }
-  .score-mid { @apply bg-amber-100 text-amber-900; }
-  .score-low { @apply bg-red-100 text-red-900; }
+  .score-high { @apply bg-emerald-100 text-emerald-950 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border dark:border-emerald-700/50; }
+  .score-mid { @apply bg-amber-100 text-amber-950 dark:bg-amber-950/80 dark:text-amber-300 dark:border dark:border-amber-700/50; }
+  .score-low { @apply bg-rose-100 text-rose-950 dark:bg-rose-950/80 dark:text-rose-300 dark:border dark:border-rose-700/50; }
   .section-kicker { @apply text-xs font-bold uppercase tracking-[0.2em] text-accent; }
   /* Use on dark/navy sections instead of .section-kicker — the plain accent color fails
      contrast on that background, this coral tint passes WCAG AA. */

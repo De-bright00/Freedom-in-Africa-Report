@@ -1,0 +1,78 @@
+import { EditionConfig } from './types'
+
+export const config2025: EditionConfig = {
+  year: '2025',
+  title: 'F(in)AR 2025',
+  shortMark: 'F(in)AR',
+  fullName: 'Freedom in Africa Report 2025',
+  editionTag: '2025 Edition · Inaugural Edition',
+  headlineSummary:
+    'The inaugural Freedom in Africa Report (F(in)AR 2025) established the first unified African-led index assessing political rights, economic opportunities, and social prosperity across all 54 nations. Africa recorded an initial composite benchmark of 52.8.',
+  overallScore: 52.8,
+  politicalScore: 49.4,
+  economicScore: 58.9,
+  prosperityScore: 50.2,
+  coverImage: '/finar-2025-cover.png',
+  pdfUrl: '/finar-2025-report.pdf',
+  pdfFileName: 'F(in)AR_2025_Freedom_in_Africa_Report.pdf',
+  datasetCsvUrl: '/finar-2025-dataset.csv',
+  datasetCsvFileName: 'F(in)AR_2025_Country_Indicator_Dataset.csv',
+  datasetPdfUrl: '/finar-2025-indicator-dataset.pdf',
+  datasetPdfFileName: 'F(in)AR_2025_Indicator_Dataset.pdf',
+  stats: [
+    { value: '52.8', label: 'Africa’s overall score', note: 'out of 100 · 2025 inaugural' },
+    { value: '49.4', label: 'Political Freedom', note: 'electoral & civil space' },
+    { value: '58.9', label: 'Economic Freedom', note: 'trade & business entry' },
+    { value: '50.2', label: 'Prosperity', note: 'living standards & stability' },
+  ],
+  regions: [
+    {
+      name: 'Southern Africa',
+      avgScore: 61.8,
+      standing: 'Best performing',
+      leader: 'Botswana (75.3) & South Africa (74.3)',
+      challenge: 'High youth unemployment and legacy land inequalities',
+    },
+    {
+      name: 'Western Africa',
+      avgScore: 57.8,
+      standing: 'Mid-table',
+      leader: 'Cabo Verde (79.8) & Ghana (68.8)',
+      challenge: 'Rising insecurity in the Sahel and military transitions',
+    },
+    {
+      name: 'Northern Africa',
+      avgScore: 51.2,
+      standing: 'Mid-table',
+      leader: 'Tunisia (67.7) & Morocco (61.7)',
+      challenge: 'Civil conflict in Sudan and fragmented governance in Libya',
+    },
+    {
+      name: 'Eastern Africa',
+      avgScore: 49.2,
+      standing: 'Mid-table',
+      leader: 'Mauritius (80.0) & Seychelles (76.6)',
+      challenge: 'Severe repression in Eritrea and protracted crisis in Somalia',
+    },
+    {
+      name: 'Central Africa',
+      avgScore: 44.3,
+      standing: 'Worst performing',
+      leader: 'Sao Tome and Principe (69.3)',
+      challenge: 'Persistent instability, autocratic consolidation, and low mobility',
+    },
+  ],
+  globalComparison: [
+    { region: 'North America', score: 85.3 },
+    { region: 'Europe', score: 77.8 },
+    { region: 'East Asia', score: 66.4 },
+    { region: 'Africa', score: 52.8, isAfrica: true },
+    { region: 'Southern & Central Asia', score: 50.0 },
+  ],
+  keyFindings: [
+    'Mauritius (80.0) emerged as Africa’s highest-ranked nation in 2025, closely followed by Cabo Verde (79.8), Seychelles (76.6), and Botswana (75.3).',
+    'Southern Africa scored as the highest-performing region (61.8), while Central Africa trailed at 44.3.',
+    'Economic Freedom was relatively strong at 58.9, but translating economic openness into shared prosperity (50.2) remained a continental challenge.',
+    'South Sudan (19.3), Somalia (25.7), and Eritrea (30.6) recorded the lowest overall scores.',
+  ],
+}

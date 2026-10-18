@@ -15,7 +15,7 @@ export function DimensionWeightChart({ dimensions }: { dimensions: Dimension[] }
               <Cell key={dimension.id} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(value: number, name: string) => [`${value}%`, name]} />
+          <Tooltip formatter={(value: any, name: any) => [`${value}%`, String(name)]} />
         </PieChart>
       </ResponsiveContainer>
     </div>
