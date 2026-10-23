@@ -79,7 +79,7 @@ export function FindingsView({ year = '2026' }: FindingsViewProps) {
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="ghost" className="text-liberalist-coral hover:bg-white/10">
-                  <Link href="/compare-years">
+                  <Link href={getLink('/compare-years')}>
                     ⚡ Compare 2025 vs 2026
                   </Link>
                 </Button>

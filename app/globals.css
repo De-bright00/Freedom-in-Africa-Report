@@ -180,6 +180,22 @@
   /* Use on dark/navy sections instead of .section-kicker — the plain accent color fails
      contrast on that background, this coral tint passes WCAG AA. */
   .section-kicker-invert { @apply text-xs font-bold uppercase tracking-[0.2em] text-liberalist-coral; }
+  
+  /* iOS momentum scroll & touch action fix for horizontal toggles and containers */
+  .touch-scroll-x,
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x pan-y !important;
+    overscroll-behavior-x: contain;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Fix blue text on dark backgrounds contrast issue */

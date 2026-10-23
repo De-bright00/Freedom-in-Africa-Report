@@ -70,7 +70,6 @@ export function Navbar() {
   // Prefix links based on active year
   const getYearLink = useCallback(
     (basePath: string) => {
-      if (basePath === '/compare-years') return '/compare-years'
       if (activeYear === '2025') {
         return basePath === '/' ? '/2025' : `/2025${basePath}`
       }
@@ -154,7 +153,8 @@ export function Navbar() {
   const isMethodologyActive = pathname === '/methodology' || pathname === '/2026/methodology' || pathname === '/2025/methodology'
   const isFindingsActive = pathname === '/findings' || pathname === '/2026/findings' || pathname === '/2025/findings'
   const isDatasetActive = pathname === '/dataset' || pathname === '/2026/dataset' || pathname === '/2025/dataset'
-  const isCompareActive = pathname === '/compare-years'
+  const isCompareActive =
+    pathname === '/compare-years' || pathname === '/2025/compare-years' || pathname === '/2026/compare-years'
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-primary text-primary-foreground">
@@ -283,7 +283,7 @@ export function Navbar() {
 
           {/* Compare Years Link */}
           <Link
-            href="/compare-years"
+            href={getYearLink('/compare-years')}
             className={`flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-wider transition-colors ${
               isCompareActive
                 ? 'bg-accent text-accent-foreground'
@@ -429,7 +429,7 @@ export function Navbar() {
 
                   {/* Mobile Compare Years */}
                   <Link
-                    href="/compare-years"
+                    href={getYearLink('/compare-years')}
                     onClick={() => setMobileSheetOpen(false)}
                     className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-base font-semibold transition-colors ${
                       isCompareActive
@@ -438,7 +438,7 @@ export function Navbar() {
                     }`}
                   >
                     <GitCompare className="size-4 text-accent" />
-                    <span>Compare 2025 vs 2026</span>
+                    <span>Compare Year</span>
                   </Link>
                 </div>
 

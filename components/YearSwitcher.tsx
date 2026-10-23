@@ -35,7 +35,6 @@ export function YearSwitcher({ currentYear, className }: YearSwitcherProps) {
 
   const handleSelectYear = (targetYear: EditionYear) => {
     setOpen(false)
-    if (targetYear === activeYear) return
 
     // Save preference
     try {
@@ -45,19 +44,9 @@ export function YearSwitcher({ currentYear, className }: YearSwitcherProps) {
       // Ignore in private browsing
     }
 
-    // Build target path
-    const stripped = pathname.replace(/^\/(2026|2025)/, '') || '/'
-    let targetPath = '/'
-
-    if (targetYear === '2026') {
-      // For 2026, root is /, otherwise keep stripped path
-      targetPath = stripped === '/' ? '/' : stripped
-    } else {
-      // For 2025, prefix with /2025
-      targetPath = stripped === '/' ? '/2025' : `/2025${stripped}`
-    }
-
-    router.push(targetPath)
+    // Return to the home of that selected year irrespective of current page, with a full refresh
+    const targetPath = targetYear === '2025' ? '/2025' : '/'
+    window.location.href = targetPath
   }
 
   return (
@@ -110,7 +99,6 @@ export function YearSwitcher({ currentYear, className }: YearSwitcherProps) {
           >
             <div className="flex items-center gap-2">
               <span className="text-sm">2025</span>
-              <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">Inaugural</span>
             </div>
             {activeYear === '2025' && <Check className="size-3.5 text-accent" />}
           </button>
@@ -120,7 +108,8 @@ export function YearSwitcher({ currentYear, className }: YearSwitcherProps) {
               type="button"
               onClick={() => {
                 setOpen(false)
-                router.push('/compare-years')
+                const comparePath = activeYear === '2025' ? '/2025/compare-years' : '/compare-years'
+                router.push(comparePath)
               }}
               className="flex w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-accent hover:bg-accent/10 transition-colors text-left"
             >

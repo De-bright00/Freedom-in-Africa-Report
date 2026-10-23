@@ -165,7 +165,7 @@ export function ProsperityView({ year = '2026' }: DimensionViewProps) {
                       <span className="font-semibold text-emerald-300">Baseline Confirmed:</span> Continental Prosperity shifted from {otherEdition.prosperityScore} ({otherYear}) to {edition.prosperityScore} ({year}) ({(edition.prosperityScore - otherEdition.prosperityScore) > 0 ? '+' : ''}{(edition.prosperityScore - otherEdition.prosperityScore).toFixed(1)} pts).
                     </p>
                     <Link
-                      href="/compare-years"
+                      href={getLink('/compare-years')}
                       className="mt-1 font-bold text-liberalist-coral hover:underline inline-flex items-center gap-1"
                     >
                       <span>Open full country comparison in /compare-years</span>

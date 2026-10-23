@@ -40,6 +40,7 @@ export function DatasetView({ year = '2026' }: DatasetViewProps) {
   const politicalFactors = indicatorMetadata.filter((i) => i.dimensionKey === 'political')
   const economicFactors = indicatorMetadata.filter((i) => i.dimensionKey === 'economic')
   const prosperityFactors = indicatorMetadata.filter((i) => i.dimensionKey === 'prosperity')
+  const getLink = (path: string) => (year === '2025' ? `/2025${path}` : path)
 
   return (
     <>
@@ -118,7 +119,7 @@ export function DatasetView({ year = '2026' }: DatasetViewProps) {
                 variant="ghost"
                 className="text-primary-foreground/80 hover:bg-white/10 hover:text-white gap-2 text-sm"
               >
-                <Link href="/compare-years">
+                <Link href={getLink('/compare-years')}>
                   <span>⚡ Compare 2025 vs 2026</span>
                 </Link>
               </Button>

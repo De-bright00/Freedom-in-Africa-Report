@@ -327,7 +327,7 @@ export function CountryView({ slug, year = '2026' }: CountryViewProps) {
                     <span className="font-semibold text-emerald-300">Baseline Confirmed:</span> Tracking verified year-on-year movement across overall and pillar dimensions.
                   </p>
                   <Button asChild size="sm" variant="outline" className="border-white/30 text-primary-foreground hover:bg-white/10 shrink-0 font-semibold h-7 text-xs">
-                    <Link href={`/compare-years?country=${country.slug}`}>
+                    <Link href={year === '2025' ? `/2025/compare-years?country=${country.slug}` : `/compare-years?country=${country.slug}`}>
                       Continental Comparative View (/compare-years) <ArrowRight className="ml-1 size-3" />
                     </Link>
                   </Button>

@@ -161,7 +161,7 @@ export function PoliticalFreedomView({ year = '2026' }: DimensionViewProps) {
                       <span className="font-semibold text-emerald-300">Baseline Confirmed:</span> Continental Political Freedom shifted from {otherEdition.politicalScore} ({otherYear}) to {edition.politicalScore} ({year}) ({(edition.politicalScore - otherEdition.politicalScore) > 0 ? '+' : ''}{(edition.politicalScore - otherEdition.politicalScore).toFixed(1)} pts).
                     </p>
                     <Link
-                      href="/compare-years"
+                      href={getLink('/compare-years')}
                       className="mt-1 font-bold text-liberalist-coral hover:underline inline-flex items-center gap-1"
                     >
                       <span>Open full country comparison in /compare-years</span>

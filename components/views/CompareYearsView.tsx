@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, Suspense } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, usePathname } from 'next/navigation'
 import {
   ArrowUpDown,
   Search,
@@ -41,10 +41,16 @@ import {
   indicatorMetadata,
   IndicatorMeta,
 } from '@/lib/editions'
+import { EditionYear } from '@/lib/editions/types'
+import { cn } from '@/lib/utils'
 
 function CompareYearsContent() {
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const initialCountry = searchParams?.get('country') || ''
+
+  const activeYear: EditionYear = pathname?.startsWith('/2025') ? '2025' : '2026'
+  const getYearLink = (p: string) => (activeYear === '2025' ? `/2025${p}` : p)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('All')
@@ -55,11 +61,63 @@ function CompareYearsContent() {
   const [isCompareViewActive, setIsCompareViewActive] = useState<boolean>(Boolean(initialCountry))
   const [indicatorPillarFilter, setIndicatorPillarFilter] = useState<'all' | 'political' | 'economic' | 'prosperity'>('all')
 
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false)
+  const [focusedSuggestionIndex, setFocusedSuggestionIndex] = useState(-1)
+  const searchContainerRef = useRef<HTMLDivElement>(null)
+
   const comparisonSectionRef = useRef<HTMLDivElement>(null)
   const tableSectionRef = useRef<HTMLDivElement>(null)
 
   const regions = ['All', 'Eastern Africa', 'Western Africa', 'Southern Africa', 'Northern Africa', 'Central Africa']
   const allComparisons = useMemo(() => getComparisonData(), [])
+
+  // Instant autocomplete suggestions for search bar
+  const suggestions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return []
+    return allComparisons
+      .filter(
+        (c) =>
+          c.country.toLowerCase().includes(q) ||
+          c.region.toLowerCase().includes(q) ||
+          c.slug.toLowerCase().includes(q)
+      )
+      .slice(0, 10)
+  }, [allComparisons, searchQuery])
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!suggestions.length) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setIsSearchDropdownOpen(true)
+      setFocusedSuggestionIndex((prev) => (prev + 1 >= suggestions.length ? 0 : prev + 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setIsSearchDropdownOpen(true)
+      setFocusedSuggestionIndex((prev) => (prev <= 0 ? suggestions.length - 1 : prev - 1))
+    } else if (e.key === 'Enter') {
+      if (focusedSuggestionIndex >= 0 && focusedSuggestionIndex < suggestions.length) {
+        e.preventDefault()
+        handleTogglePick(suggestions[focusedSuggestionIndex].slug)
+      } else if (suggestions.length === 1) {
+        e.preventDefault()
+        handleTogglePick(suggestions[0].slug)
+      }
+    } else if (e.key === 'Escape') {
+      setIsSearchDropdownOpen(false)
+    }
+  }
 
   useEffect(() => {
     if (initialCountry && !pickedSlugs.includes(initialCountry)) {
@@ -251,7 +309,7 @@ function CompareYearsContent() {
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20 gap-2 text-sm font-semibold">
-                  <Link href="/dataset">
+                  <Link href={getYearLink('/dataset')}>
                     <span>Explore 20-Factor Indicator Matrix</span>
                   </Link>
                 </Button>
@@ -562,43 +620,45 @@ function CompareYearsContent() {
                   </div>
 
                   {/* Filter Pillar Tabs */}
-                  <div className="inline-flex rounded-lg border border-white/10 bg-[#162032] p-1 text-xs">
-                    <button
-                      type="button"
-                      onClick={() => setIndicatorPillarFilter('all')}
-                      className={`rounded px-2.5 py-1 font-semibold transition-colors ${
-                        indicatorPillarFilter === 'all' ? 'bg-accent text-accent-foreground shadow-sm' : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      All 20
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIndicatorPillarFilter('political')}
-                      className={`rounded px-2.5 py-1 font-semibold transition-colors ${
-                        indicatorPillarFilter === 'political' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      Political (A–F)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIndicatorPillarFilter('economic')}
-                      className={`rounded px-2.5 py-1 font-semibold transition-colors ${
-                        indicatorPillarFilter === 'economic' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      Economic (G–M)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIndicatorPillarFilter('prosperity')}
-                      className={`rounded px-2.5 py-1 font-semibold transition-colors ${
-                        indicatorPillarFilter === 'prosperity' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      Prosperity (N–T)
-                    </button>
+                  <div className="max-w-full overflow-x-auto touch-scroll-x scrollbar-none py-0.5">
+                    <div className="inline-flex shrink-0 rounded-lg border border-white/10 bg-[#162032] p-1 text-xs whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => setIndicatorPillarFilter('all')}
+                        className={`shrink-0 rounded px-2.5 py-1 font-semibold transition-colors touch-manipulation ${
+                          indicatorPillarFilter === 'all' ? 'bg-accent text-accent-foreground shadow-sm' : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        All 20
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIndicatorPillarFilter('political')}
+                        className={`shrink-0 rounded px-2.5 py-1 font-semibold transition-colors touch-manipulation ${
+                          indicatorPillarFilter === 'political' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Political (A–F)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIndicatorPillarFilter('economic')}
+                        className={`shrink-0 rounded px-2.5 py-1 font-semibold transition-colors touch-manipulation ${
+                          indicatorPillarFilter === 'economic' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Economic (G–M)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIndicatorPillarFilter('prosperity')}
+                        className={`shrink-0 rounded px-2.5 py-1 font-semibold transition-colors touch-manipulation ${
+                          indicatorPillarFilter === 'prosperity' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Prosperity (N–T)
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -848,16 +908,158 @@ function CompareYearsContent() {
         {/* COMPARISON TABLE CONTROLS */}
         <section ref={tableSectionRef} className="mx-auto max-w-7xl px-5 pb-24 lg:px-8">
           <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-sm md:flex-row md:items-center md:justify-between mb-6">
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Filter Search */}
-              <div className="relative min-w-[240px]">
-                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+              {/* Filter Search with Autocomplete Suggestions & Instant Ticking */}
+              <div className="relative min-w-[260px] flex-1 md:flex-initial md:w-80" ref={searchContainerRef}>
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search country or region..."
+                  id="compare-search"
+                  placeholder="Search country to compare..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-10 bg-background text-sm"
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value)
+                    setIsSearchDropdownOpen(true)
+                    setFocusedSuggestionIndex(-1)
+                  }}
+                  onFocus={() => {
+                    if (searchQuery.trim().length > 0) setIsSearchDropdownOpen(true)
+                  }}
+                  onKeyDown={handleSearchKeyDown}
+                  className="pl-9 pr-9 h-10 bg-background text-sm"
+                  aria-autocomplete="list"
+                  aria-expanded={isSearchDropdownOpen}
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery('')
+                      setIsSearchDropdownOpen(false)
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5"
+                    aria-label="Clear search query"
+                  >
+                    <X className="size-4" />
+                  </button>
+                )}
+
+                {/* Autocomplete Suggestions Popup - floating above mobile keyboard */}
+                {isSearchDropdownOpen && searchQuery.trim().length > 0 && (
+                  <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[300px] w-full overflow-y-auto rounded-xl border border-border bg-card p-2 text-card-foreground shadow-2xl ring-1 ring-black/10 animate-in fade-in-50 zoom-in-95 touch-scroll-x">
+                    <div className="flex items-center justify-between px-2 py-1 text-[11px] font-semibold text-muted-foreground border-b border-border/60 pb-1.5 mb-1">
+                      <span>Matching Countries ({suggestions.length})</span>
+                      <span className="text-[10px] text-accent font-medium">Tick box to compare</span>
+                    </div>
+
+                    {suggestions.length === 0 ? (
+                      <div className="p-4 text-center text-xs text-muted-foreground">
+                        No country found matching &ldquo;{searchQuery}&rdquo;
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-1">
+                        {suggestions.map((c, idx) => {
+                          const isPicked = pickedSlugs.includes(c.slug)
+                          const isFocused = focusedSuggestionIndex === idx
+                          return (
+                            <div
+                              key={c.slug}
+                              onClick={() => handleTogglePick(c.slug)}
+                              className={cn(
+                                'flex items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-xs transition-colors cursor-pointer select-none',
+                                isPicked
+                                  ? 'bg-accent/15 border border-accent/40 font-semibold text-foreground'
+                                  : 'hover:bg-muted text-foreground',
+                                isFocused && 'ring-2 ring-accent'
+                              )}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <input
+                                  type="checkbox"
+                                  checked={isPicked}
+                                  onChange={(e) => {
+                                    e.stopPropagation()
+                                    handleTogglePick(c.slug)
+                                  }}
+                                  className="size-4 rounded border-input text-accent focus:ring-accent cursor-pointer accent-liberalist-crimson shrink-0"
+                                  aria-label={`Select ${c.country}`}
+                                />
+                                <span className="text-base select-none shrink-0">{c.flagEmoji}</span>
+                                <div className="min-w-0 truncate">
+                                  <div className="font-semibold truncate">{c.country}</div>
+                                  <div className="text-[10px] text-muted-foreground truncate font-normal">
+                                    #{c.y2026.rank} · {c.region}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0">
+                                <div className="text-right">
+                                  <span className="font-mono font-bold text-foreground">{c.y2026.overall.toFixed(1)}</span>
+                                  <span
+                                    className={cn(
+                                      'ml-1 text-[10px] font-mono font-semibold',
+                                      c.change.overall > 0
+                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                        : c.change.overall < 0
+                                        ? 'text-rose-600 dark:text-rose-400'
+                                        : 'text-muted-foreground'
+                                    )}
+                                  >
+                                    ({c.change.overall > 0 ? `+${c.change.overall.toFixed(1)}` : c.change.overall.toFixed(1)})
+                                  </span>
+                                </div>
+                                {isPicked ? (
+                                  <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-bold text-accent-foreground">
+                                    Ticked
+                                  </span>
+                                ) : (
+                                  <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                                    + Tick
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+
+                    <div className="mt-2 flex items-center justify-between border-t border-border/60 pt-2 px-1">
+                      <span className="text-[11px] font-semibold text-muted-foreground">
+                        {pickedSlugs.length} selected
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {pickedSlugs.length > 0 && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setIsSearchDropdownOpen(false)
+                              handleOpenComparison()
+                            }}
+                            className="h-7 text-[11px] bg-accent text-accent-foreground font-bold px-2.5 shadow-sm"
+                          >
+                            <GitCompare className="mr-1 size-3" />
+                            Compare Selected
+                          </Button>
+                        )}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setIsSearchDropdownOpen(false)
+                          }}
+                          className="h-7 text-[11px] px-2 text-muted-foreground"
+                        >
+                          Done
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Region Dropdown */}
@@ -876,35 +1078,37 @@ function CompareYearsContent() {
                 <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               </div>
 
-              {/* Trend Filter */}
-              <div className="inline-flex rounded-lg border bg-muted/40 p-1 text-xs">
-                <button
-                  type="button"
-                  onClick={() => setFilterTrend('all')}
-                  className={`rounded px-3 py-1.5 font-semibold transition-colors ${
-                    filterTrend === 'all' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  All 54
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFilterTrend('gained')}
-                  className={`rounded px-3 py-1.5 font-semibold transition-colors ${
-                    filterTrend === 'gained' ? 'bg-emerald-600 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  Gained
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFilterTrend('declined')}
-                  className={`rounded px-3 py-1.5 font-semibold transition-colors ${
-                    filterTrend === 'declined' ? 'bg-rose-600 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  Declined
-                </button>
+              {/* Trend Filter with smooth touch scrolling on iOS */}
+              <div className="max-w-full overflow-x-auto touch-scroll-x scrollbar-none py-0.5">
+                <div className="inline-flex shrink-0 rounded-lg border bg-muted/40 p-1 text-xs whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => setFilterTrend('all')}
+                    className={`shrink-0 rounded px-3 py-1.5 font-semibold transition-colors touch-manipulation ${
+                      filterTrend === 'all' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    All 54
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilterTrend('gained')}
+                    className={`shrink-0 rounded px-3 py-1.5 font-semibold transition-colors touch-manipulation ${
+                      filterTrend === 'gained' ? 'bg-emerald-600 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Gained
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilterTrend('declined')}
+                    className={`shrink-0 rounded px-3 py-1.5 font-semibold transition-colors touch-manipulation ${
+                      filterTrend === 'declined' ? 'bg-rose-600 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Declined
+                  </button>
+                </div>
               </div>
             </div>
 

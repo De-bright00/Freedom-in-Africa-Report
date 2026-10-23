@@ -167,34 +167,36 @@ export function DatasetExplorer({ initialYear = '2026' }: DatasetExplorerProps) 
       <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-sm md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Active Dataset:</span>
-          <div className="inline-flex rounded-lg border bg-muted/40 p-1">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveYear('2026')
-              }}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition-all ${
-                activeYear === '2026'
-                  ? 'bg-accent text-accent-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <span>2026 Edition</span>
-              <span className="rounded bg-black/20 px-1 py-0.2 text-[9px] uppercase">Latest</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveYear('2025')
-              }}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition-all ${
-                activeYear === '2025'
-                  ? 'bg-accent text-accent-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <span>2025 Edition</span>
-            </button>
+          <div className="max-w-full overflow-x-auto touch-scroll-x scrollbar-none py-0.5">
+            <div className="inline-flex shrink-0 rounded-lg border bg-muted/40 p-1 whitespace-nowrap">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveYear('2026')
+                }}
+                className={`flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition-all touch-manipulation ${
+                  activeYear === '2026'
+                    ? 'bg-accent text-accent-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <span>2026 Edition</span>
+                <span className="rounded bg-black/20 px-1 py-0.2 text-[9px] uppercase">Latest</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveYear('2025')
+                }}
+                className={`flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition-all touch-manipulation ${
+                  activeYear === '2025'
+                    ? 'bg-accent text-accent-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <span>2025 Edition</span>
+              </button>
+            </div>
           </div>
         </div>
 

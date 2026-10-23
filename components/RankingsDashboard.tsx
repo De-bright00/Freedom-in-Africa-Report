@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Search,
@@ -25,6 +25,7 @@ import { ScoreBadge } from '@/components/ui/ScoreBadge'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { getCountriesForYear, type Country } from '@/lib/data'
 import { EditionYear } from '@/lib/editions/types'
+import { cn } from '@/lib/utils'
 
 type ParameterType = 'score' | 'politicalScore' | 'economicScore' | 'prosperityScore'
 
@@ -60,6 +61,10 @@ export function RankingsDashboard({ year = '2026' }: RankingsDashboardProps) {
 
   // Load countries for the active year
   const rawCountries = useMemo(() => getCountriesForYear(year), [year])
+
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false)
+  const [focusedSuggestionIndex, setFocusedSuggestionIndex] = useState(-1)
+  const searchContainerRef = useRef<HTMLDivElement>(null)
 
   // Handle checking/unchecking a country for comparison
   const handleToggleSelect = (slug: string) => {
@@ -144,6 +149,54 @@ export function RankingsDashboard({ year = '2026' }: RankingsDashboardProps) {
       })
   }, [rankedCountries, searchQuery, selectedRegion, sortField, sortAsc, selectedParameters])
 
+  // Instant autocomplete suggestions for search bar
+  const searchSuggestions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return []
+    return rankedCountries
+      .filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          c.region.toLowerCase().includes(q) ||
+          c.canonicalRegion.toLowerCase().includes(q) ||
+          c.slug.toLowerCase().includes(q)
+      )
+      .slice(0, 10)
+  }, [rankedCountries, searchQuery])
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!searchSuggestions.length) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setIsSearchDropdownOpen(true)
+      setFocusedSuggestionIndex((prev) => (prev + 1 >= searchSuggestions.length ? 0 : prev + 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setIsSearchDropdownOpen(true)
+      setFocusedSuggestionIndex((prev) => (prev <= 0 ? searchSuggestions.length - 1 : prev - 1))
+    } else if (e.key === 'Enter') {
+      if (focusedSuggestionIndex >= 0 && focusedSuggestionIndex < searchSuggestions.length) {
+        e.preventDefault()
+        handleToggleSelect(searchSuggestions[focusedSuggestionIndex].slug)
+      } else if (searchSuggestions.length === 1) {
+        e.preventDefault()
+        handleToggleSelect(searchSuggestions[0].slug)
+      }
+    } else if (e.key === 'Escape') {
+      setIsSearchDropdownOpen(false)
+    }
+  }
+
   // Clear selections
   const clearSelection = () => {
     setSelectedSlugs([])
@@ -167,42 +220,44 @@ export function RankingsDashboard({ year = '2026' }: RankingsDashboardProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* QUICK TIER FILTERS & YEAR COMPARE TOGGLE */}
+      {/* QUICK TIER FILTERS & YEAR COMPARE TOGGLE with smooth iOS scrolling */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex rounded-lg border bg-muted/40 p-1 text-xs">
-          <button
-            type="button"
-            onClick={() => setTierFilter('all')}
-            className={`rounded-md px-3 py-1.5 font-semibold transition-all ${
-              tierFilter === 'all'
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            All 54 Nations
-          </button>
-          <button
-            type="button"
-            onClick={() => setTierFilter('top10')}
-            className={`rounded-md px-3 py-1.5 font-semibold transition-all ${
-              tierFilter === 'top10'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Top 10 Freest
-          </button>
-          <button
-            type="button"
-            onClick={() => setTierFilter('bottom10')}
-            className={`rounded-md px-3 py-1.5 font-semibold transition-all ${
-              tierFilter === 'bottom10'
-                ? 'bg-rose-600 text-white shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Bottom 10
-          </button>
+        <div className="max-w-full overflow-x-auto touch-scroll-x scrollbar-none py-0.5">
+          <div className="inline-flex shrink-0 rounded-lg border bg-muted/40 p-1 text-xs whitespace-nowrap">
+            <button
+              type="button"
+              onClick={() => setTierFilter('all')}
+              className={`shrink-0 rounded-md px-3 py-1.5 font-semibold transition-all touch-manipulation ${
+                tierFilter === 'all'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              All 54 Nations
+            </button>
+            <button
+              type="button"
+              onClick={() => setTierFilter('top10')}
+              className={`shrink-0 rounded-md px-3 py-1.5 font-semibold transition-all touch-manipulation ${
+                tierFilter === 'top10'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Top 10 Freest
+            </button>
+            <button
+              type="button"
+              onClick={() => setTierFilter('bottom10')}
+              className={`shrink-0 rounded-md px-3 py-1.5 font-semibold transition-all touch-manipulation ${
+                tierFilter === 'bottom10'
+                  ? 'bg-rose-600 text-white shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Bottom 10
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -235,7 +290,7 @@ export function RankingsDashboard({ year = '2026' }: RankingsDashboardProps) {
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <Button asChild size="sm" variant="outline" className="h-7 text-xs font-semibold">
-              <Link href="/compare-years">Full View (/compare-years) <ArrowRight className="ml-1 size-3" /></Link>
+              <Link href={year === '2025' ? '/2025/compare-years' : '/compare-years'}>Full View (/compare-years) <ArrowRight className="ml-1 size-3" /></Link>
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setIsCompareYearsMode(false)} className="h-7 text-xs">
               <X className="mr-1 size-3" /> Close Compare
@@ -246,28 +301,146 @@ export function RankingsDashboard({ year = '2026' }: RankingsDashboardProps) {
 
       {/* FILTER & CONTROL BAR */}
       <div className="grid gap-4 rounded-xl border bg-card p-4 text-card-foreground shadow-sm md:grid-cols-[1.5fr_1fr_1.5fr_auto] md:items-end">
-        {/* Search Input */}
-        <div className="flex flex-col gap-1.5">
+        {/* Search Input with Autocomplete Suggestions & Direct Checkboxes */}
+        <div className="flex flex-col gap-1.5" ref={searchContainerRef}>
           <label htmlFor="country-search" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Search Countries
           </label>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="country-search"
               placeholder="Search by country or region..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-background"
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                setIsSearchDropdownOpen(true)
+                setFocusedSuggestionIndex(-1)
+              }}
+              onFocus={() => {
+                if (searchQuery.trim().length > 0) setIsSearchDropdownOpen(true)
+              }}
+              onKeyDown={handleSearchKeyDown}
+              className="pl-9 pr-9 bg-background"
+              aria-autocomplete="list"
+              aria-expanded={isSearchDropdownOpen}
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                type="button"
+                onClick={() => {
+                  setSearchQuery('')
+                  setIsSearchDropdownOpen(false)
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5"
                 aria-label="Clear search query"
               >
                 <X className="size-4" />
               </button>
+            )}
+
+            {/* Suggestions Popup */}
+            {isSearchDropdownOpen && searchQuery.trim().length > 0 && (
+              <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[300px] w-full overflow-y-auto rounded-xl border border-border bg-card p-2 text-card-foreground shadow-2xl ring-1 ring-black/10 animate-in fade-in-50 zoom-in-95 touch-scroll-x">
+                <div className="flex items-center justify-between px-2 py-1 text-[11px] font-semibold text-muted-foreground border-b border-border/60 pb-1.5 mb-1">
+                  <span>Matching Countries ({searchSuggestions.length})</span>
+                  <span className="text-[10px] text-accent font-medium">Tick box to compare</span>
+                </div>
+
+                {searchSuggestions.length === 0 ? (
+                  <div className="p-4 text-center text-xs text-muted-foreground">
+                    No country found matching &ldquo;{searchQuery}&rdquo;
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-1">
+                    {searchSuggestions.map((c, idx) => {
+                      const isPicked = selectedSlugs.includes(c.slug)
+                      const isFocused = focusedSuggestionIndex === idx
+                      return (
+                        <div
+                          key={c.slug}
+                          onClick={() => handleToggleSelect(c.slug)}
+                          className={cn(
+                            'flex items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-xs transition-colors cursor-pointer select-none',
+                            isPicked
+                              ? 'bg-accent/15 border border-accent/40 font-semibold text-foreground'
+                              : 'hover:bg-muted text-foreground',
+                            isFocused && 'ring-2 ring-accent'
+                          )}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <input
+                              type="checkbox"
+                              checked={isPicked}
+                              onChange={(e) => {
+                                e.stopPropagation()
+                                handleToggleSelect(c.slug)
+                              }}
+                              className="size-4 rounded border-input text-accent focus:ring-accent cursor-pointer accent-liberalist-crimson shrink-0"
+                              aria-label={`Select ${c.name}`}
+                            />
+                            <span className="text-base select-none shrink-0">{c.flagEmoji}</span>
+                            <div className="min-w-0 truncate">
+                              <div className="font-semibold truncate">{c.name}</div>
+                              <div className="text-[10px] text-muted-foreground truncate font-normal">
+                                #{c.ranks['score']} · {c.region} Africa
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <div className="font-mono font-bold text-foreground">{c.score.toFixed(1)}</div>
+                            {isPicked ? (
+                              <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-bold text-accent-foreground">
+                                Ticked
+                              </span>
+                            ) : (
+                              <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                                + Tick
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                <div className="mt-2 flex items-center justify-between border-t border-border/60 pt-2 px-1">
+                  <span className="text-[11px] font-semibold text-muted-foreground">
+                    {selectedSlugs.length} selected
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {selectedSlugs.length >= 2 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setIsSearchDropdownOpen(false)
+                          setActiveTab('compare')
+                        }}
+                        className="h-7 text-[11px] bg-accent text-accent-foreground font-bold px-2.5 shadow-sm"
+                      >
+                        <SlidersHorizontal className="mr-1 size-3" />
+                        Compare Selected
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setIsSearchDropdownOpen(false)
+                      }}
+                      className="h-7 text-[11px] px-2 text-muted-foreground"
+                    >
+                      Done
+                    </Button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -384,7 +557,7 @@ export function RankingsDashboard({ year = '2026' }: RankingsDashboardProps) {
           </span>
         </div>
         <Link
-          href="/compare-years"
+          href={year === '2025' ? '/2025/compare-years' : '/compare-years'}
           className="inline-flex items-center gap-1 font-semibold text-accent hover:underline"
         >
           <span>Compare 2025 vs 2026 across all nations</span>

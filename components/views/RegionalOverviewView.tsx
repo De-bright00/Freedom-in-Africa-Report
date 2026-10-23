@@ -125,7 +125,7 @@ export function RegionalOverviewView({ year = '2026' }: RegionalOverviewViewProp
                       <span className="font-semibold text-emerald-300">Baseline Confirmed:</span> Tracking regional trends across all 5 geographical zones with verified multi-year baseline data.
                     </p>
                     <Link
-                      href="/compare-years"
+                      href={getLink('/compare-years')}
                       className="mt-1 font-bold text-liberalist-coral hover:underline inline-flex items-center gap-1"
                     >
                       <span>Open full country-by-country comparison in /compare-years</span>

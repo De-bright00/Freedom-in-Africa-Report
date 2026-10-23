@@ -93,7 +93,7 @@ export function HomeView({ year = '2026' }: HomeViewProps) {
               {/* Quick Jump to Comparison */}
               <div className="mt-6 flex items-center gap-2 text-xs text-primary-foreground/60">
                 <span>Want to see how scores changed?</span>
-                <Link href="/compare-years" className="font-semibold text-liberalist-coral hover:underline inline-flex items-center gap-1">
+                <Link href={getLink('/compare-years')} className="font-semibold text-liberalist-coral hover:underline inline-flex items-center gap-1">
                   <span>Compare 2025 vs 2026</span>
                   <ArrowRight className="size-3" />
                 </Link>
