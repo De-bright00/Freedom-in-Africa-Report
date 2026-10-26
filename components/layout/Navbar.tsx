@@ -154,7 +154,10 @@ export function Navbar() {
   const isFindingsActive = pathname === '/findings' || pathname === '/2026/findings' || pathname === '/2025/findings'
   const isDatasetActive = pathname === '/dataset' || pathname === '/2026/dataset' || pathname === '/2025/dataset'
   const isCompareActive =
-    pathname === '/compare-years' || pathname === '/2025/compare-years' || pathname === '/2026/compare-years'
+    pathname === '/compare-years' ||
+    pathname === '/2025/compare-years' ||
+    pathname === '/2026/compare-years' ||
+    Boolean(pathname?.includes('compare-years'))
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-primary text-primary-foreground">
@@ -164,7 +167,7 @@ export function Navbar() {
           <Link href={getYearLink('/')} className="flex shrink-0 items-center" aria-label="F(in)AR home">
             <img src="/logo.png" alt="F(in)AR" className="h-10 w-auto object-contain" />
           </Link>
-          <YearSwitcher currentYear={activeYear} className="hidden sm:inline-block" />
+          <YearSwitcher currentYear={activeYear} isCompare={isCompareActive} className="hidden sm:inline-block" />
         </div>
 
         {/* Desktop Navigation */}
@@ -311,7 +314,7 @@ export function Navbar() {
 
         {/* Mobile Navigation Sheet */}
         <div className="flex items-center gap-2 lg:hidden">
-          <YearSwitcher currentYear={activeYear} className="sm:hidden" />
+          <YearSwitcher currentYear={activeYear} isCompare={isCompareActive} className="sm:hidden" />
           <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
             <SheetTrigger
               render={
@@ -331,7 +334,7 @@ export function Navbar() {
                 {/* Brand Logo & Year Switcher in Sheet */}
                 <div className="flex items-center justify-between border-b border-white/10 pb-4">
                   <img src="/logo.png" alt="F(in)AR" className="h-8 w-auto object-contain" />
-                  <YearSwitcher currentYear={activeYear} />
+                  <YearSwitcher currentYear={activeYear} isCompare={isCompareActive} />
                 </div>
 
                 {/* Mobile Links */}
